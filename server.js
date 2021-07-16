@@ -15,6 +15,8 @@ app.use(session({
 	saveUninitialized: true
 }));
 
+app.set('view engine', 'pug')
+
 mongoose.Promise = global.Promise;
 const db = {};
 db.mongoose = mongoose;
@@ -51,7 +53,7 @@ var accounts = mongoose.model('accounts', accountsSchema)
 app.listen(3000,  () => console.log("Example app listening on port 3000!"));
 
 app.get('/', function(request, response) {
-	response.sendFile(path.join(__dirname + '/index.html'));
+	response.render('login');
 });
 
 app.post('/auth', function(request, response) {
@@ -79,9 +81,9 @@ app.post('/auth', function(request, response) {
 	
 	app.get('/home', function(request, response) {
 		if (request.session.loggedin) {
-			response.send('Welcome back, ' + request.session.username + '!');
+			response.render('home', { title: 'Welcome back', message: 'Hello ' + request.session.username })
 		} else {
-			response.send('Please login to view this page!');
+			response.render('home', { title: 'Welcome', message: 'Please login to view this page!' })
 		}
 		response.end();
 	});
