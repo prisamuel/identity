@@ -1,9 +1,8 @@
-html 
-	head
-		title= 'All about logins'
-	body
-		h1= 'Login Form'
+extends layout
+
+block content
+	a.login-form
 		form(action='/auth', method='POST')
-			input(type='text', name='username')
-			input(type='password', name='password')
+			input(type='text', name='username', placeholder='Username', required)
+			input(type='password', name='password', placeholder='Password', required)
 			input(type='submit')

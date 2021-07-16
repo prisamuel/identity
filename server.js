@@ -4,7 +4,7 @@ var path = require('path');
 let  app = express();
 const mongoose = require('mongoose');
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({
 	extended: true
 }));
