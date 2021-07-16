@@ -1,11 +1,13 @@
 const express = require("express");
 var session = require('express-session');
-var bodyParser = require('body-parser');
 var path = require('path');
 let  app = express();
 const mongoose = require('mongoose');
 
 app.use(express.static('public'));
+app.use(express.urlencoded({
+	extended: true
+}));
 
 app.use(session({
 	secret: 'secret',
@@ -13,27 +15,38 @@ app.use(session({
 	saveUninitialized: true
 }));
 
-
 mongoose.Promise = global.Promise;
-
 const db = {};
 db.mongoose = mongoose;
 db.user = require("./user.js");
 let dbConfig = require("./db.config.js")
 
 db.mongoose
-  .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => {
-    console.log("Successfully connect to MongoDB.");
-    initial();
-  })
-  .catch(err => {
-    console.error("Connection error", err);
-    process.exit();
-  });
+	.connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		user: dbConfig.USER,
+		pass: dbConfig.PASS,
+		authSource: dbConfig.DB
+	})
+	.then(() => {
+		console.log("Successfully connect to MongoDB.");
+	})
+	.catch(err => {
+		console.error("Connection error", err);
+		process.exit();
+});
+
+var accountsSchema = new mongoose.Schema({
+	username: {
+		type: String,
+	},
+	password: {
+		type: String,
+	}
+});
+
+var accounts = mongoose.model('accounts', accountsSchema)
 
 app.listen(3000,  () => console.log("Example app listening on port 3000!"));
 
@@ -45,27 +58,30 @@ app.post('/auth', function(request, response) {
 	var username = request.body.username;
 	var password = request.body.password;
 	if (username && password) {
-		connection.query('SELECT * FROM accounts WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
-			if (results.length > 0) {
-				request.session.loggedin = true;
-				request.session.username = username;
-				response.redirect('/home');
-			} else {
-				response.send('Incorrect Username and/or Password!');
-			}			
-			response.end();
-		});
-	} else {
-		response.send('Please enter Username and Password!');
+		accounts.find().
+		where('username').equals(username).
+		where('password').equals(password).
+		exec( 
+			function(err, results) {
+				if (err) throw new Error(err)
+				if (results.length > 0) {
+					request.session.loggedin = true;
+					request.session.username = username;
+					response.redirect('/home');
+				} else {
+					response.redirect("/")
+				}			
+				response.end();
+			}
+			)
+		}
+	});
+	
+	app.get('/home', function(request, response) {
+		if (request.session.loggedin) {
+			response.send('Welcome back, ' + request.session.username + '!');
+		} else {
+			response.send('Please login to view this page!');
+		}
 		response.end();
-	}
-});
-
-app.get('/home', function(request, response) {
-	if (request.session.loggedin) {
-		response.send('Welcome back, ' + request.session.username + '!');
-	} else {
-		response.send('Please login to view this page!');
-	}
-	response.end();
-});
+	});
