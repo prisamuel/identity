@@ -20,7 +20,6 @@ app.set('view engine', 'pug')
 mongoose.Promise = global.Promise
 const db = {}
 db.mongoose = mongoose
-db.user = require('./user.js')
 const dbConfig = require('./db.config.js')
 
 db.mongoose

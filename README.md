@@ -15,6 +15,10 @@ Start the server
 ```
 $ npm start
 ```
+or
+```
+$ node .
+```
 
 # Setting up MongoDB
 Set up MongoDB with some basic user accounts, db and data.
