@@ -23,7 +23,7 @@ const accounts = db.accounts
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
 
 app.get('/', function (request, response) {
-  response.render('login')
+  response.render('login', { message: 'Welcome to Identity' })
 })
 
 app.post('/auth', function (request, response) {
@@ -41,7 +41,7 @@ app.post('/auth', function (request, response) {
             request.session.username = username
             response.redirect('/home')
           } else {
-            response.redirect('/')
+            response.render('login', { message: 'Incorrect credentials, try again' })
           }
           response.end()
         }

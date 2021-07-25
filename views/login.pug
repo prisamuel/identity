@@ -2,6 +2,7 @@ extends layout
 
 block content
 	a.login-form
+		h4= message
 		form(action='/auth', method='POST')
 			input(type='text', name='username', placeholder='Username', required)
 			input(type='password', name='password', placeholder='Password', required)
