@@ -11,6 +11,12 @@ This step assumes you already have MongoDB installed and set up. Refer instructi
 export MONGO_PASSWORD="XXX"
 ```
 
+For OAuth to Github
+```
+export GITHUB_OAUTH_CLI_ID=XXX
+export GITHUB_OAUTH_CLI_SECRET=XXX
+```
+
 Start the server
 ```
 $ npm start

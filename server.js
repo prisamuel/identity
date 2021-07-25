@@ -1,8 +1,17 @@
 const express = require('express')
 const session = require('express-session')
-const db = require('./db.js')
+const axios = require('axios')
 const path = require('path')
+
+const db = require('./db.js')
 const app = express()
+const clientID = process.env.GITHUB_OAUTH_CLI_ID
+const clientSecret = process.env.GITHUB_OAUTH_CLI_SECRET
+
+if (!clientID || !clientSecret) {
+  console.error('Error: Export GITHUB_OAUTH_CLI_ID and GITHUB_OAUTH_CLI_SECRET to proceed')
+  process.exit()
+}
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({
@@ -56,4 +65,24 @@ app.get('/home', function (request, response) {
     response.render('home', { title: 'Welcome', message: 'Please login to view this page!' })
   }
   response.end()
+})
+
+app.get('/auth/github/callback', (request, response) => {
+  const body = {
+    client_id: clientID,
+    client_secret: clientSecret,
+    code: request.query.code
+  }
+  const opts = { headers: { accept: 'application/json' } }
+  axios.post('https://github.com/login/oauth/access_token', body, opts)
+    .then(response => response.data.access_token)
+    .then(_token => {
+      console.log('My token:', _token)
+      response.redirect('/home')
+    })
+    .catch(err => response.status(500).json({ message: err.message }))
+})
+
+app.get('/github', (request, response) => {
+  response.redirect(`https://github.com/login/oauth/authorize?client_id=${clientID}`)
 })
